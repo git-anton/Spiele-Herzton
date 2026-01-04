@@ -1,0 +1,92 @@
+<!doctype>
+<html lang="de">
+    <head>
+        <title>spiele ton</title>
+        <meta charset="utf-8">
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin-top: 50px;
+            }
+            button {
+                font-size: 20px;
+                padding: 10px 20px;
+                margin: 10px;
+                cursor: pointer;
+            }
+            .slider-container {
+                width: 100%;
+                text-align: center;
+            }
+            input[type="range"] {
+                width: 100%;
+            }
+            .value-display {
+                margin-top: 10px;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+        </style>
+
+
+
+    </head>
+    <body>
+        <p>Drücke den Knopf, um einen Ton zu hören!</p>
+        <button id="playBtn">Ton abspielen</button>
+        <button id="stopBtn">Stop</button>
+        <div class="slider-container">
+            <input type="range" id="mySlider" min="0" max="100" value="50">
+            <div class="value-display">Wert: <span id="sliderValue">5000 Hz</span></div>
+        </div>
+    </body>
+        <script>
+            
+
+            let audioCtx;
+            let oscillator;
+
+            document.getElementById("playBtn").addEventListener("click", () => {
+                // AudioContext erstellen
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Oszillator erzeugen
+                oscillator = audioCtx.createOscillator();
+                oscillator.type = "sine";        // Wellenform: Sinus
+                oscillator.frequency.value = 5000; // Frequenz in Hz
+
+                // Lautstärke-Kontrolle
+                const gainNode = audioCtx.createGain();
+                gainNode.gain.value = 0.1; // Lautstärke (0.0 - 1.0)
+
+                // Verkabelung: Oszillator -> Gain -> Ausgabe
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                // Starten
+                oscillator.start();
+            });
+
+            document.getElementById("stopBtn").addEventListener("click", () => {
+                if (oscillator) {
+                    oscillator.stop();
+                    oscillator.disconnect();
+                }
+                if (audioCtx) {
+                    audioCtx.close();
+                }
+            });
+
+            const slider = document.getElementById("mySlider");
+            const output = document.getElementById("sliderValue");
+
+            // Eventlistener: Wert aktualisieren, wenn der Schieberegler bewegt wird
+            slider.addEventListener("input", function() {
+                output.textContent = (slider.value * 100) + " Hz";
+                oscillator.frequency.value = slider.value * 100;
+            });
+
+        </script>
+</html>
